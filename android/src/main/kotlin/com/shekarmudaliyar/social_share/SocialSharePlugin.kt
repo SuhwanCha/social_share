@@ -105,12 +105,16 @@ class SocialSharePlugin:FlutterPlugin, MethodCallHandler, ActivityAware {
             intent.putExtra("bottom_background_color", backgroundBottomColor)
             // Instantiate activity and verify it will resolve implicit intent
             activity!!.grantUriPermission(appName, stickerImageFile, Intent.FLAG_GRANT_READ_URI_PERMISSION)
-            if (activity!!.packageManager.resolveActivity(intent, 0) != null) {
+            
+            var canLaunch = false
+            try {
                 activeContext!!.startActivity(intent)
-                result.success("success")
-            } else {
-                result.success("error")
+                canLaunch = true
+            } catch (e: ActivityNotFoundException) {
+                canLaunch = false
             }
+            result.success(canLaunch)
+
         } else if (call.method == "shareOptions") {
             //native share options
             val content: String? = call.argument("content")
