@@ -9,20 +9,24 @@ class SocialShare {
 
   static Future<String?> shareInstagramStory({
     required String appId,
-    required String imagePath,
+    String? imagePath,
+    Uint8List? imageBytes,
     String? backgroundTopColor,
     String? backgroundBottomColor,
     String? backgroundResourcePath,
+    Uint8List? backgroundResourceBytes,
     String? attributionURL,
   }) async {
     return shareMetaStory(
       appId: appId,
       platform: "shareInstagramStory",
       imagePath: imagePath,
+      imageBytes: imageBytes,
       backgroundTopColor: backgroundTopColor,
       backgroundBottomColor: backgroundBottomColor,
       attributionURL: attributionURL,
       backgroundResourcePath: backgroundResourcePath,
+      backgroundResourceBytes: backgroundResourceBytes,
     );
   }
 
@@ -49,21 +53,31 @@ class SocialShare {
     required String appId,
     required String platform,
     String? imagePath,
+    Uint8List? imageBytes,
     String? backgroundTopColor,
     String? backgroundBottomColor,
     String? attributionURL,
     String? backgroundResourcePath,
+    Uint8List? backgroundResourceBytes,
   }) async {
     var _imagePath = imagePath;
     var _backgroundResourcePath = backgroundResourcePath;
 
     if (Platform.isAndroid) {
       var stickerFilename = "stickerAsset.png";
-      await reSaveImage(imagePath, stickerFilename);
+      if (imageBytes == null) {
+        await reSaveImage(imagePath, stickerFilename);
+      } else {
+        await saveImage(imageBytes, stickerFilename);
+      }
       _imagePath = stickerFilename;
       if (backgroundResourcePath != null) {
         var backgroundImageFilename = backgroundResourcePath.split("/").last;
         await reSaveImage(backgroundResourcePath, backgroundImageFilename);
+        _backgroundResourcePath = backgroundImageFilename;
+      } else if (backgroundResourceBytes != null) {
+        var backgroundImageFilename = "backgroundImage.png";
+        await saveImage(backgroundResourceBytes, backgroundImageFilename);
         _backgroundResourcePath = backgroundImageFilename;
       }
     }
@@ -213,6 +227,18 @@ class SocialShare {
     final Uint8List stickerAssetAsList = stickerData;
     final stickerAssetPath = '${tempDir.path}/$stickerAssetName';
     file = await File(stickerAssetPath).create();
+    file.writeAsBytesSync(stickerAssetAsList);
+    return true;
+  }
+
+  static Future<bool> saveImage(Uint8List bytes, String filename) async {
+    final tempDir = await getTemporaryDirectory();
+
+    var stickerData = bytes.buffer.asUint8List();
+    String stickerAssetName = filename;
+    final Uint8List stickerAssetAsList = stickerData;
+    final stickerAssetPath = '${tempDir.path}/$stickerAssetName';
+    final file = await File(stickerAssetPath).create();
     file.writeAsBytesSync(stickerAssetAsList);
     return true;
   }
