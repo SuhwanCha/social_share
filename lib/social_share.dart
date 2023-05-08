@@ -34,6 +34,8 @@ class SocialShare {
     required String appId,
     String? imagePath,
     String? backgroundTopColor,
+    Uint8List? imageBytes,
+    Uint8List? backgroundResourceBytes,
     String? backgroundBottomColor,
     String? backgroundResourcePath,
     String? attributionURL,
@@ -42,6 +44,8 @@ class SocialShare {
       appId: appId,
       platform: "shareFacebookStory",
       imagePath: imagePath,
+      imageBytes: imageBytes,
+      backgroundResourceBytes: backgroundResourceBytes,
       backgroundTopColor: backgroundTopColor,
       backgroundBottomColor: backgroundBottomColor,
       attributionURL: attributionURL,
@@ -99,8 +103,9 @@ class SocialShare {
       }
     }
 
-    final String? response = await _channel.invokeMethod(platform, args);
-    return response;
+    final resp = await _channel.invokeMethod(platform, args);
+
+    return '';
   }
 
   static Future<String?> shareTwitter(
